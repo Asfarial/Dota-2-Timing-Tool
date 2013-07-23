@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <tchar.h>
 #include <sapi.h>
+#include "optionsIO.h"
 #include "resource.h"
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
@@ -78,7 +79,7 @@ TCHAR speech[120];
 class ThreadJob
 {
 public:
-  ~ThreadJob()
+	~ThreadJob()
 	{
 	}
 	VOID closeThread();
@@ -92,6 +93,7 @@ public:
 };
 class Text
 {
+	friend void changeBeginned(int);
 	friend class ThreadJob;
 public:
 	Text()
@@ -116,11 +118,14 @@ public:
 		{
 			SetWindowText(zeroBoxText[number], L"");
 			SetWindowText(zeroBoxTime[number], L"");
+			applied=false;
 		}
 		else
 		{
 			if(beginned==false)
+			{
 				getMainText();
+			}
 			else
 			{
 				SetWindowText(zeroBoxText[number], retStruct.text);
@@ -130,20 +135,26 @@ public:
 	}
 	VOID readText()
 	{
+		if(applied!=true)
+			return;
 		getText();
 		hr = pVoice->Speak(retStruct.speech, SPF_IS_XML|SPF_ASYNC, 0);
+		ZeroMemory(&retStruct.speech, 120);
 		if(beginned==false)
 			beginThread();
 	}
 protected:
 	VOID getMainText()
 	{
+		ZeroMemory(&retStruct.text, 30);
+		ZeroMemory(&retStruct.stdTime, 30);
 		retStruct.length=GetWindowTextLength(zeroBoxText[number]);
 		TCHAR* buf=new TCHAR[retStruct.length+1];
 		GetWindowText(zeroBoxText[number], buf, retStruct.length+1);
 		_tcscat_s(retStruct.text, 30, buf);
 		delete [] buf;
 		GetWindowText(zeroBoxTime[number], retStruct.stdTime, 4);
+		applied=true;
 	}
 
 	VOID getText()
@@ -159,7 +170,7 @@ protected:
 	}
 	VOID onOff()
 	{
-
+		ZeroMemory(&onOffbuf, 4);
 		if(GetWindowTextLength(NUMactive[number])<11)
 		{
 			GetWindowText(timeLeft[number], onOffbuf, 4);
@@ -167,7 +178,6 @@ protected:
 		else
 		{
 			_tcscat_s(onOffbuf, 4, retStruct.stdTime); 
-			GetWindowText(zeroBoxTime[number], onOffbuf, 4);
 		}
 	}
 	VOID beginThread()
@@ -177,13 +187,13 @@ protected:
 		SetWindowText(NUMactive[number], L"Activated");
 		int *send = &number;
 		hThrd[number] = CreateThread(NULL,0,Threads, send,0, &ThrdID[number]);
-		ZeroMemory(&retStruct.speech, 120);
 	}
+	bool applied;
 	int number;
 	bool beginned;
 	TCHAR onOffbuf[4];
 	TextStruct retStruct;
-}TextO[10];
+}TextO[9];
 VOID wrkWndw()
 {
 	WNDCLASSEX wcex2;
@@ -241,6 +251,10 @@ VOID ThreadJob::closeThread()
 	TextO[numberr].beginned=false;
 	CloseHandle(hThrd[numberr]);
 	TerminateThread(hThrd[numberr],0);
+}
+void changeBeginned(int v)
+{
+	TextO[v].beginned=false;
 }
 VOID CALLBACK TimerCallBack(HWND hWnd, UINT message, UINT idTimer, DWORD dwTime)
 {
@@ -518,13 +532,6 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_STOP_TIMER_MSG:
 		{
-			for(int i = 0; i!= 10; i++)
-			{
-				if(hFcsd==zeroBoxText[i])
-					return 1;
-				if(hFcsd==zeroBoxTime[i])
-					return 1;
-			}
 			DWORD dwExitCode = 0;
 			if( GetExitCodeThread(hThrd[(int)lParam], &dwExitCode))
 			{
@@ -532,6 +539,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				CloseHandle(hThrd[(int)lParam]);
 				SetWindowText(NUMactive[(int)lParam], L"Deactivated");
 				SetWindowText(timeLeft[(int)lParam], L"0");
+				changeBeginned((int)lParam);
 				TextStruct tstr;
 				ZeroMemory(tstr.speech, 120);
 				tstr.length = GetWindowTextLength(zeroBoxText[(int)lParam]);
