@@ -55,10 +55,11 @@ CAPTION "FAQ"
 FONT 12, "MS Shell Dlg", 400, 0, 0xCC
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,266,130,66,18
-    LTEXT           "When you did that, you can either click onto button at the left side of window (0-9) or \r\npress a key on a NUMpad on your keyboard.\r\nIf you do that, then you will hear a voice, wich will read a text from fields.",IDC_STATIC,7,38,325,23
-    LTEXT           "To stop a timer you have to either click a ""Stop"" button or\r\npress a - key + number on a NUMpad.\r\nAfter that you will heas some sort of ""BE-EE-EP"" and voice will tell you\r\nthat the timer is stopped.",IDC_STATIC,7,70,325,39
+    LTEXT           "When you did that, you can either click onto button at the left side of window (0-9) or \r\npress a key on a NUMpad on your keyboard.\r\nIf you do that, then you will hear a voice, wich will read a text from fields.",IDC_STATIC,7,33,325,25
+    LTEXT           "To stop a timer you have to either click a ""Stop"" button or\r\npress a - key + number on a NUMpad.\r\nAfter that you will heas some sort of ""BE-EE-EP"" and voice will tell you\r\nthat the timer is stopped.",IDC_STATIC,7,59,325,34
     LTEXT           "Don`t play Dota 2 too much =)\r\nBest regards,\r\nArial!",IDC_STATIC,7,116,132,32
-    LTEXT           "At first you should know, that to start up timer you have to fill ""Text"" and ""Time"" fields.\r\nThen click ""Apply"".(Zero button ""Roshan"" is applied automaticly).\r\nNotice, that when timer is working, you can`t change it`s text and time by ""Apply"".",IDC_STATIC,7,7,275,28
+    LTEXT           "At first you should know, that to start up timer you have to fill ""Text"" and ""Time"" fields.\r\nThen click ""Apply"".(Zero button ""Roshan"" is applied automaticly).\r\nNotice, that when timer is working, you can`t change it`s text and time by ""Apply"".",IDC_STATIC,7,7,275,25
+    LTEXT           "Red cross button clears ""Time"" and ""Text"" fields, when timer is not running.",IDC_STATIC,7,93,325,17
 END
 
 IDD_DIALOG2 DIALOGEX 0, 0, 135, 69
