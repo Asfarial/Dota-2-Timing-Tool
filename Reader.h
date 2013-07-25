@@ -1,8 +1,3 @@
-//#ifdef READER_EXPORTS
-//#define READER_API __declspec(dllexport) 
-//#else
-//#define READER_API __declspec(dllimport) 
-//#endif
 #ifndef READER_H
 #define READER_H
 
