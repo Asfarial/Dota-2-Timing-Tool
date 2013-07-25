@@ -1,12 +1,4 @@
-#pragma region include
-#include <windows.h>
-#include <tchar.h>
-#include <sapi.h>
-#include "resource.h"
-#pragma comment(linker,"\"/manifestdependency:type='win32' \
-name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
-processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#pragma endregion include
+#include "header.h"
 #pragma region globVar
 static TCHAR szWindowClass[] = _T("Main");
 static TCHAR szTitle[] = _T("Dota 2 Timing Tool");
@@ -26,68 +18,32 @@ HWND NUM[10];
 HWND NUMclear[10];
 HWND NUMactive[10];
 HWND timeLeft[10];
+HWND vol;
+HWND speed;
+HWND gender;
 HANDLE hThrd[10];
 DWORD ThrdID[10];
 HGDIOBJ hFont;
 HWND hTxtDest;
+TCHAR opt[100];
 HRESULT hr;
 ISpVoice * pVoice = NULL;
 bool allowed=true;
 #define KEYUP(vkCode) ((GetAsyncKeyState(vkCode) & 0x8000) ? false : true)
 #define KEYDOWN(vkCode) ((GetAsyncKeyState(vkCode) & 0x8000) ? 1 : 0)
 #pragma endregion globVar
-#pragma region IDs
-#define SINGLE_BUTTON 1101
-#define HOST_BUTTON 1102
-#define CLIENT_BUTTON 1103
-#define IDT_INPUT_TIMER 1104
-#define IDR_MENU_FAQ 1105
-#define IDR_MENU_ABOUT 1106
-#define IDR_MENU_OPTIONS 1107
-#define ZERO_NUM 1000
-#define ONE_NUM 1001
-#define TWO_NUM 1002
-#define THREE_NUM 1003
-#define FOUR_NUM 1004
-#define FIVE_NUM 1005
-#define SIX_NUM 1006
-#define SEVEN_NUM 1007
-#define EIGHT_NUM 1008
-#define NINE_NUM 1009
-#define APPLY_BUTTON 1010
-#define ZERO_BOX_STOP 1011
-#define ONE_BOX_STOP 1012
-#define TWO_BOX_STOP 1013
-#define THREE_BOX_STOP 1014
-#define FOUR_BOX_STOP 1015
-#define FIVE_BOX_STOP 1016
-#define SIX_BOX_STOP 1017
-#define SEVEN_BOX_STOP 1018
-#define EIGHT_BOX_STOP 1019
-#define NINE_BOX_STOP 1020
-#define ZERO_CLEAR 121
-#define ONE_CLEAR 122
-#define TWO_CLEAR 123
-#define THREE_CLEAR 124
-#define FOUR_CLEAR 125
-#define FIVE_CLEAR 126
-#define SIX_CLEAR 127
-#define SEVEN_CLEAR 128
-#define EIGHT_CLEAR 129
-#define NINE_CLEAR 110
-#define WM_STOP_TIMER_MSG (WM_USER+1)
-#pragma endregion IDs
 #pragma region functions
 LRESULT CALLBACK WndProc1(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK WndProc2(HWND, UINT, WPARAM, LPARAM);
 DWORD WINAPI Threads(LPVOID val);
 INT_PTR CALLBACK About(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam);
 INT_PTR CALLBACK FAQ(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam);
+INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam);
 typedef struct
 {int length;
 TCHAR stdTime[4];
-TCHAR text[30];
-TCHAR speech[120];
+TCHAR text[130];
+TCHAR speech[130];
 }TextStruct;
 class ThreadJob
 {
@@ -108,12 +64,13 @@ class Text
 {
 	friend void changeBeginned(int);
 	friend void checkBeginned(int);
+	friend void loadOptions();
 	friend class ThreadJob;
 public:
 	Text()
 	{
-		ZeroMemory(&retStruct.speech, 120);
-		ZeroMemory(&retStruct.text, 30);
+		ZeroMemory(&retStruct.speech, 130);
+		ZeroMemory(&retStruct.text, 130);
 		ZeroMemory(&retStruct.stdTime, 4);
 		ZeroMemory(&onOffbuf, 4);
 		retStruct.length=0;
@@ -154,7 +111,7 @@ public:
 		getText();
 		setTrue();
 		hr = pVoice->Speak(retStruct.speech, SPF_IS_XML|SPF_ASYNC, 0);
-		ZeroMemory(&retStruct.speech, 120);
+		ZeroMemory(&retStruct.speech, 130);
 		if(beginned==false)
 			beginThread();
 	}
@@ -166,12 +123,12 @@ protected:
 	}
 	VOID getMainText()
 	{
-		ZeroMemory(&retStruct.text, 30);
-		ZeroMemory(&retStruct.stdTime, 30);
+		ZeroMemory(&retStruct.text, 130);
+		ZeroMemory(&retStruct.stdTime, 4);
 		retStruct.length=GetWindowTextLength(zeroBoxText[number]);
 		TCHAR* buf=new TCHAR[retStruct.length+1];
 		GetWindowText(zeroBoxText[number], buf, retStruct.length+1);
-		_tcscat_s(retStruct.text, 30, buf);
+		_tcscat_s(retStruct.text, 130, buf);
 		delete [] buf;
 		GetWindowText(zeroBoxTime[number], retStruct.stdTime, 4);
 		applied=true;
@@ -182,10 +139,11 @@ protected:
 		TCHAR sleep[] = L"<silence msec=\"100\"/>";
 		onOff();
 		TCHAR seconds[] = L" seconds";
-		_tcscat_s(retStruct.speech, 120, retStruct.text); 
-		_tcscat_s(retStruct.speech, 120, sleep);
-		_tcscat_s(retStruct.speech, 120, onOffbuf);
-		_tcscat_s(retStruct.speech, 120, seconds);
+		_tcscat_s(retStruct.speech, 130, opt);
+		_tcscat_s(retStruct.speech, 130, retStruct.text); 
+		_tcscat_s(retStruct.speech, 130, sleep);
+		_tcscat_s(retStruct.speech, 130, onOffbuf);
+		_tcscat_s(retStruct.speech, 130, seconds);
 
 	}
 	VOID onOff()
@@ -208,12 +166,23 @@ protected:
 		int *send = &number;
 		hThrd[number] = CreateThread(NULL,0,Threads, send,0, &ThrdID[number]);
 	}
+
 	bool applied;
 	int number;
 	bool beginned;
 	TCHAR onOffbuf[4];
 	TextStruct retStruct;
 }TextO[9];
+void loadOptions()
+{
+	ZeroMemory(&opt, 100);
+	_tcscat_s(opt, 100, CReader::MyClass::ReadConfig());
+	if(opt==L"")
+	{
+		CReader::MyClass::CreateConfig();
+		loadOptions();
+	}
+}
 VOID wrkWndw()
 {
 	WNDCLASSEX wcex2;
@@ -460,7 +429,7 @@ LRESULT CALLBACK WndProc1(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_CREATE:
 		{
-
+			loadOptions();
 			hdc = BeginPaint(hWnd, &ps);
 			GetTextExtentPoint32(hdc, _T("Choose Your Destiny:"), lstrlen(_T("Choose Your Destiny:")), &sz);
 			EndPaint(hWnd, &ps);
@@ -494,7 +463,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 		{
-			
+
 			CoInitialize(0);
 			if(!SUCCEEDED(hr) )
 				SendMessage(hWnd, WM_DESTROY, 0, 0);
@@ -609,6 +578,9 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case IDR_MENU_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG2), 0, About);
+			break;
+		case IDR_MENU_OPTIONS:
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG3), 0, Options);
 			break;
 		default:
 			break;
@@ -807,6 +779,152 @@ INT_PTR CALLBACK About(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
 	case WM_COMMAND:
 		if (LOWORD(wParam) == IDOK)
+		{
+			EndDialog(hwndDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	case WM_SYSCOMMAND:
+		if(wParam==SC_CLOSE)
+		{
+			EndDialog(hwndDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
+}
+INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+	const TCHAR *speedComboBoxItems[] = {L"-2", L"-1", L"0", L"+1", L"+2"};
+	const TCHAR *genderComboBoxItems[] = {L"Male", L"Female"};
+	UNREFERENCED_PARAMETER(lParam);
+	switch (uMsg)
+	{
+	case WM_INITDIALOG:
+		{
+			speed = CreateWindow(L"COMBOBOX", NULL,WS_CHILD | WS_VISIBLE | WS_TABSTOP|CBS_DROPDOWNLIST,100, 8, 136, 16,hwndDlg, NULL,hInst,NULL);
+			gender = CreateWindow(L"COMBOBOX", NULL,WS_CHILD | WS_VISIBLE | WS_TABSTOP|CBS_DROPDOWNLIST,100, 38, 136, 16,hwndDlg, NULL,hInst,NULL);
+			SendMessage(speed,
+				CB_ADDSTRING,
+				0,
+				reinterpret_cast<LPARAM>((LPCWSTR)speedComboBoxItems[0]));
+			SendMessage(speed,
+				CB_ADDSTRING,
+				0,
+				reinterpret_cast<LPARAM>((LPCWSTR)speedComboBoxItems[1]));
+			SendMessage(speed,
+				CB_ADDSTRING,
+				0,
+				reinterpret_cast<LPARAM>((LPCWSTR)speedComboBoxItems[2]));
+			SendMessage(speed,
+				CB_ADDSTRING,
+				0,
+				reinterpret_cast<LPARAM>((LPCWSTR)speedComboBoxItems[3]));
+			SendMessage(speed,
+				CB_ADDSTRING,
+				0,
+				reinterpret_cast<LPARAM>((LPCWSTR)speedComboBoxItems[4]));
+			SendMessage(gender,
+				CB_ADDSTRING,
+				0,
+				reinterpret_cast<LPARAM>((LPCWSTR)genderComboBoxItems[0]));
+			SendMessage(gender,
+				CB_ADDSTRING,
+				0,
+				reinterpret_cast<LPARAM>((LPCWSTR)genderComboBoxItems[1]));
+			TCHAR cBuf[50];
+			ZeroMemory(&cBuf, 50);
+			_tcscat_s(cBuf, 50, CReader::MyClass::ReadConfigForWindow());
+			int i = 0;
+			int entry=0;
+			int count=0;
+			int v;
+			TCHAR tBufvol[30];
+			ZeroMemory(&tBufvol, 30);
+			while(i!=_tcslen(cBuf))
+			{
+				if(cBuf[i]=='|')
+				{
+					++count;
+					_tcsncat_s(tBufvol, 30, &cBuf[entry], i-entry);
+					entry=i+1;
+					switch (count)
+					{
+					case 1:
+						v = _wtoi(tBufvol);
+						v /= 10;
+						break;
+					case 2:
+						{
+							TCHAR bf[3];
+							ZeroMemory(&bf,3);
+							_tcscat_s(bf,3,tBufvol);
+							int x = _wtoi(tBufvol);
+							switch (x)
+							{
+							case -2:
+								SendMessage(speed, CB_SETCURSEL, 0, 0);
+								break;
+							case -1:
+								SendMessage(speed, CB_SETCURSEL, 1, 0);
+								break;
+							case 0:
+								SendMessage(speed, CB_SETCURSEL, 2, 0);
+								break;
+							case 1:
+								SendMessage(speed, CB_SETCURSEL, 3, 0);
+								break;
+							case 2:
+								SendMessage(speed, CB_SETCURSEL, 4, 0);
+								break;
+							default:
+								break;
+							}
+						}
+						break;
+					case 3:
+						if(CompareStringEx(LOCALE_NAME_INVARIANT, SORT_STRINGSORT, tBufvol, _tcslen(tBufvol), L"Gender=Female;Age=Adult", _tcslen(L"Gender=Female;Age=Adult"), NULL, NULL, 0)==CSTR_EQUAL)
+						{
+							SendMessage(gender, CB_SETCURSEL, 1, 0);
+						}else{SendMessage(gender, CB_SETCURSEL, 0, 0);
+						}
+						break;
+					default:
+						break;
+					}
+					ZeroMemory(&tBufvol, 30);
+				}
+				++i;
+			}
+
+			
+			vol = CreateWindowEx(0, TRACKBAR_CLASS, L"", WS_CHILD|WS_VISIBLE|TBS_HORZ|TBS_BOTH|TBS_AUTOTICKS, 100, 68, 200, 42,hwndDlg, (HMENU)VOL_BAR, hInst, NULL);
+			SendMessage(vol, TBM_SETRANGE, (WPARAM) TRUE, (LPARAM) MAKELONG(1, 10));
+			SendMessage(vol, TBM_SETPAGESIZE,0, (LPARAM) 1);
+			SendMessage(vol, TBM_SETPOS,(WPARAM) TRUE,(LPARAM) v); 
+
+			return (INT_PTR)TRUE;
+		}
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK)
+		{
+			TCHAR tBuf[100];
+			ZeroMemory(&tBuf, 100);
+			TCHAR tvol[4];
+			int ivol = SendMessage(vol, TBM_GETPOS,NULL,NULL);
+			ivol*=10;
+			_itow_s(ivol, tvol, 10);
+			TCHAR tgender[7];
+			GetWindowText(gender, tgender, 7);
+			TCHAR tspeed[3];
+			GetWindowText(speed, tspeed, 3);
+			swprintf_s(tBuf, L"<volume level=\"%ls\"/>\r\n<rate speed=\"%ls\"/>\r\n<voice required=\"Gender=%ls;Age=Adult\"/>", tvol, tspeed, tgender);
+			CReader::MyClass::ChangeConfig(tBuf, _tcslen(tBuf));
+			loadOptions();
+			EndDialog(hwndDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}else if (LOWORD(wParam) == IDCANCEL)
 		{
 			EndDialog(hwndDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
