@@ -177,7 +177,7 @@ void loadOptions()
 {
 	ZeroMemory(&opt, 100);
 	_tcscat_s(opt, 100, CReader::MyClass::ReadConfig());
-	if(opt==L"")
+	if(CompareStringEx(LOCALE_NAME_INVARIANT, SORT_STRINGSORT, opt, _tcslen(opt), L"", _tcslen(L""), NULL, NULL, 0)==CSTR_EQUAL)
 	{
 		CReader::MyClass::CreateConfig();
 		loadOptions();
