@@ -176,10 +176,10 @@ protected:
 void loadOptions()
 {
 	ZeroMemory(&opt, 100);
-	_tcscat_s(opt, 100, CReader::MyClass::ReadConfig());
+	_tcscat_s(opt, 100, CReader::RDLL::ReadConfig());
 	if(CompareStringEx(LOCALE_NAME_INVARIANT, SORT_STRINGSORT, opt, _tcslen(opt), L"", _tcslen(L""), NULL, NULL, 0)==CSTR_EQUAL)
 	{
-		CReader::MyClass::CreateConfig();
+		CReader::RDLL::CreateConfig();
 		loadOptions();
 	}
 }
@@ -264,6 +264,20 @@ VOID CALLBACK TimerCallBack(HWND hWnd, UINT message, UINT idTimer, DWORD dwTime)
 	allowed=true;
 	KillTimer(window2, IDT_INPUT_TIMER);
 }
+void RegKeys()
+{
+	RegisterHotKey(NULL, 0, MOD_NOREPEAT, VK_NUMPAD0);
+	RegisterHotKey(NULL, 1, MOD_NOREPEAT, VK_NUMPAD1);
+	RegisterHotKey(NULL, 2, MOD_NOREPEAT, VK_NUMPAD2);
+	RegisterHotKey(NULL, 3, MOD_NOREPEAT, VK_NUMPAD3);
+	RegisterHotKey(NULL, 4, MOD_NOREPEAT, VK_NUMPAD4);
+	RegisterHotKey(NULL, 5, MOD_NOREPEAT, VK_NUMPAD5);
+	RegisterHotKey(NULL, 6, MOD_NOREPEAT, VK_NUMPAD6);
+	RegisterHotKey(NULL, 7, MOD_NOREPEAT, VK_NUMPAD7);
+	RegisterHotKey(NULL, 8, MOD_NOREPEAT, VK_NUMPAD8);
+	RegisterHotKey(NULL, 9, MOD_NOREPEAT, VK_NUMPAD9);
+	RegisterHotKey(NULL, 10, MOD_NOREPEAT, VK_SUBTRACT);
+}
 #pragma endregion functions
 int WINAPI WinMain(HINSTANCE hInstance,
 				   HINSTANCE hPrevInstance,
@@ -310,95 +324,93 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	}
 	ShowWindow(window1,nCmdShow);
 	UpdateWindow(window1);
-
+	RegKeys();
 	MSG msg;
 	ZeroMemory(&msg, sizeof(MSG));
-	PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE);
-	while (msg.message!=WM_QUIT) 
+	while (GetMessage(&msg, NULL, 0, 0)) 
 	{
-
-		if(PeekMessage(&msg, NULL,0,0,PM_REMOVE))
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+		if(msg.message==WM_HOTKEY)
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-
-		}
-		if(KEYDOWN(VK_SUBTRACT))
-		{
-			Sleep(1);
-			if(KEYDOWN(VK_NUMPAD0))
-				SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)0);
-			else if(KEYDOWN(VK_NUMPAD1))
-				SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)1);
-			else if(KEYDOWN(VK_NUMPAD2))
-				SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)2);
-			else if(KEYDOWN(VK_NUMPAD3))
-				SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)3);
-			else if(KEYDOWN(VK_NUMPAD4))
-				SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)4);
-			else if(KEYDOWN(VK_NUMPAD5))
-				SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)5);
-			else if(KEYDOWN(VK_NUMPAD6))
-				SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)6);
-			else if(KEYDOWN(VK_NUMPAD7))
-				SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)7);
-			else if(KEYDOWN(VK_NUMPAD8))
-				SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)8);
-			else if(KEYDOWN(VK_NUMPAD9))
-				SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)9);
-		}else if(KEYDOWN(VK_NUMPAD0))
-		{
-			Sleep(1);
-			if(KEYUP(VK_NUMPAD0))
+			switch (msg.wParam)
+			{
+			case 0:
 				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
-		}else if(KEYDOWN(VK_NUMPAD1))
-		{
-			Sleep(1);
-			if(KEYUP(VK_NUMPAD1))
-				SendMessage(window2, WM_COMMAND, ONE_NUM, NULL);
-		}else if(KEYDOWN(VK_NUMPAD2))
-		{
-			Sleep(1);
-			if(KEYUP(VK_NUMPAD2))
-				SendMessage(window2, WM_COMMAND, TWO_NUM, NULL);
-		}else if(KEYDOWN(VK_NUMPAD3))
-		{
-			Sleep(1);
-			if(KEYUP(VK_NUMPAD3))
-				SendMessage(window2, WM_COMMAND, THREE_NUM, NULL);
-		}else if(KEYDOWN(VK_NUMPAD4))
-		{
-			Sleep(1);
-			if(KEYUP(VK_NUMPAD4))
-				SendMessage(window2, WM_COMMAND, FOUR_NUM, NULL);
-		}else if(KEYDOWN(VK_NUMPAD5))
-		{
-			Sleep(1);
-			if(KEYUP(VK_NUMPAD5))
-				SendMessage(window2, WM_COMMAND, FIVE_NUM, NULL);
-		}else if(KEYDOWN(VK_NUMPAD6))
-		{
-			Sleep(1);
-			if(KEYUP(VK_NUMPAD6))
-				SendMessage(window2, WM_COMMAND, SIX_NUM, NULL);
-		}else if(KEYDOWN(VK_NUMPAD7))
-		{
-			Sleep(1);
-			if(KEYUP(VK_NUMPAD7))
-				SendMessage(window2, WM_COMMAND, SEVEN_NUM, NULL);
-		}else if(KEYDOWN(VK_NUMPAD8))
-		{
-			Sleep(1);
-			if(KEYUP(VK_NUMPAD8))
-				SendMessage(window2, WM_COMMAND, EIGHT_NUM, NULL);
-		}else if(KEYDOWN(VK_NUMPAD9))
-		{
-			Sleep(1);
-			if(KEYUP(VK_NUMPAD9))
-				SendMessage(window2, WM_COMMAND, NINE_NUM, NULL);
+				break;
+			case 1:
+				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				break;
+			case 2:
+				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				break;
+			case 3:
+				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				break;
+			case 4:
+				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				break;
+			case 5:
+				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				break;
+			case 6:
+				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				break;
+			case 7:
+				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				break;
+			case 8:
+				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				break;
+			case 9:
+				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				break;
+			case 10:
+				GetMessage(&msg, NULL, 0, 0);
+				if(msg.message==WM_HOTKEY)
+				{
+					switch (msg.wParam)
+					{
+					case 0:
+						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)0);
+						break;
+					case 1:
+						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)1);
+						break;
+					case 2:
+						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)2);
+						break;
+					case 3:
+						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)3);
+						break;
+					case 4:
+						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)4);
+						break;
+					case 5:
+						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)5);
+						break;
+					case 6:
+						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)6);
+						break;
+					case 7:
+						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)7);
+						break;
+					case 8:
+						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)8);
+						break;
+					case 9:
+						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)9);
+						break;
+					default:
+						break;
+					}
+				}
+				break;
+			default:
+				break;
+			}
 		}
 	}
-
 	return (int) msg.wParam;
 }
 LRESULT CALLBACK WndProc1(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -459,7 +471,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	SIZE sz, szDeact, szZero;
 	HWND hFcsd=GetFocus();
 	short wmID;
-	
+
 	switch(message)
 	{
 	case WM_CREATE:
@@ -775,9 +787,21 @@ INT_PTR CALLBACK About(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 	UNREFERENCED_PARAMETER(lParam);
 	switch (uMsg)
 	{
-	case WM_INITDIALOG:
-		return (INT_PTR)TRUE;
+	case WM_INITDIALOG:{
+		HFONT hFont = CreateFont(12, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE, 0x1, 
+	  OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, 
+	  DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));
+		TCHAR dVer [4];
+		ZeroMemory(&dVer, 4);
+		_tcscat_s(dVer,4, CReader::RDLL::returnVersion());
+		TCHAR dVerT [17];
+		_tcscat_s(dVerT, 17, L"DLL version ");
+		_tcscat_s(dVerT, 17, dVer);
+		HWND DLLver = CreateWindowEx(NULL, L"STATIC", dVerT, ES_LEFT|WS_CHILD|WS_VISIBLE, 94,45,80,14, hwndDlg, NULL, NULL, NULL);
+		SendMessage(DLLver, WM_SETFONT, (WPARAM)hFont, TRUE);
 
+		return (INT_PTR)TRUE;
+					   }
 	case WM_COMMAND:
 		if (LOWORD(wParam) == IDOK)
 		{
@@ -836,12 +860,12 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				reinterpret_cast<LPARAM>((LPCWSTR)genderComboBoxItems[1]));
 			TCHAR cBuf[50];
 			ZeroMemory(&cBuf, 50);
-			_tcscat_s(cBuf, 50, CReader::MyClass::ReadConfigForWindow());
+			_tcscat_s(cBuf, 50, CReader::RDLL::ReadConfigForWindow());
 			if(CompareStringEx(LOCALE_NAME_INVARIANT, SORT_STRINGSORT, cBuf, _tcslen(cBuf), L"", _tcslen(L""), NULL, NULL, 0)==CSTR_EQUAL)
 			{
-				CReader::MyClass::CreateConfig();
+				CReader::RDLL::CreateConfig();
 				ZeroMemory(&cBuf, 50);
-				_tcscat_s(cBuf, 50, CReader::MyClass::ReadConfigForWindow());
+				_tcscat_s(cBuf, 50, CReader::RDLL::ReadConfigForWindow());
 			}
 			byte i = 0;
 			byte entry=0;
@@ -905,7 +929,7 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				++i;
 			}
 
-			
+
 			vol = CreateWindowEx(0, TRACKBAR_CLASS, L"", WS_CHILD|WS_VISIBLE|TBS_HORZ|TBS_BOTH|TBS_AUTOTICKS, 100, 68, 200, 42,hwndDlg, (HMENU)VOL_BAR, hInst, NULL);
 			SendMessage(vol, TBM_SETRANGE, (WPARAM) TRUE, (LPARAM) MAKELONG(1, 10));
 			SendMessage(vol, TBM_SETPAGESIZE,0, (LPARAM) 1);
@@ -927,7 +951,7 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			TCHAR tspeed[3];
 			GetWindowText(speed, tspeed, 3);
 			swprintf_s(tBuf, L"<volume level=\"%ls\"/>\r\n<rate speed=\"%ls\"/>\r\n<voice required=\"Gender=%ls;Age=Adult\"/>", tvol, tspeed, tgender);
-			CReader::MyClass::ChangeConfig(tBuf, _tcslen(tBuf));
+			CReader::RDLL::ChangeConfig(tBuf, _tcslen(tBuf));
 			loadOptions();
 			EndDialog(hwndDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
