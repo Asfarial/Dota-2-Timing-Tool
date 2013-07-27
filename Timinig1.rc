@@ -68,7 +68,7 @@ CAPTION "About"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "ОК",IDOK,72,65,50,14
-    LTEXT           "Dota 2 Timing Tool\r\nVersion 1.4\n\r\r\rOpenSource\r\nCreated by Arial",IDC_STATIC,63,7,59,53
+    LTEXT           "Dota 2 Timing Tool\r\nVersion 1.4.1\n\r\r\rOpenSource\r\nCreated by Arial",IDC_STATIC,63,7,59,53
     CONTROL         103,IDC_STATIC,"Static",SS_BITMAP,14,7,43,39
 END
 
