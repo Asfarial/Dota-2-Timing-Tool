@@ -26,6 +26,7 @@ DWORD ThrdID[10];
 HGDIOBJ hFont;
 HWND hTxtDest;
 TCHAR opt[100];
+bool stopIT[10]={false,false,false,false,false,false,false,false,false,false};
 HRESULT hr;
 ISpVoice * pVoice = NULL;
 bool allowed=true;
@@ -40,7 +41,7 @@ INT_PTR CALLBACK About(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam);
 INT_PTR CALLBACK FAQ(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam);
 INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam);
 typedef struct
-{byte length;
+{unsigned char length;
 TCHAR stdTime[4];
 TCHAR text[130];
 TCHAR speech[130];
@@ -58,12 +59,13 @@ public:
 		_itow_s(time, buff, 10);
 		SetWindowText(timeLeft[numberr], buff);
 	}
-	byte numberr;
+	VOID stopThread();
+	char numberr;
 };
 class Text
 {
-	friend void changeBeginned(byte);
-	friend void checkBeginned(byte);
+	friend void changeBeginned(char);
+	friend void checkBeginned(char);
 	friend void loadOptions();
 	friend class ThreadJob;
 public:
@@ -79,7 +81,7 @@ public:
 	~Text()
 	{
 	}
-	VOID init(byte cl)
+	VOID init(char cl)
 	{
 		number = cl;
 	}
@@ -163,12 +165,12 @@ protected:
 		beginned=true;
 		SetWindowText(timeLeft[number], onOffbuf);
 		SetWindowText(NUMactive[number], L"Activated");
-		byte *send = &number;
+		char *send = &number;
 		hThrd[number] = CreateThread(NULL,0,Threads, send,0, &ThrdID[number]);
 	}
 
 	bool applied;
-	byte number;
+	char number;
 	bool beginned;
 	TCHAR onOffbuf[4];
 	TextStruct retStruct;
@@ -232,24 +234,45 @@ VOID wrkWndw()
 	UpdateWindow(window2);
 	DrawMenuBar(window2);
 }
+VOID ThreadJob::stopThread()
+{
+	SetWindowText(NUMactive[numberr], L"Deactivated");
+	SetWindowText(timeLeft[numberr], L"0");
+	changeBeginned(numberr);
+	TextStruct tstr;
+	ZeroMemory(tstr.speech, 130);
+	tstr.length = GetWindowTextLength(zeroBoxText[numberr]);
+	TCHAR* buf=new TCHAR[tstr.length+1];
+	GetWindowText(zeroBoxText[numberr], buf, tstr.length+1);
+	_tcscat_s(tstr.speech, 130, opt);
+	_tcscat_s(tstr.speech, 130, buf);
+	_tcscat_s(tstr.speech, 130, L" stopped");
+	hr = pVoice->Speak(tstr.speech, SPF_IS_XML|SPF_ASYNC, 0);
+	delete [] buf;
+	stopIT[numberr]=false;
+	CloseHandle(hThrd[numberr]);
+	ExitThread(0);
+}
 VOID ThreadJob::closeThread()
 {
-	byte length = GetWindowTextLength(zeroBoxText[numberr]);
-	TCHAR* buf=new TCHAR[length+1];
-	GetWindowText(zeroBoxText[numberr], buf, length+1);
+	TextStruct tstr;
+	ZeroMemory(tstr.speech, 130);
+	tstr.length = GetWindowTextLength(zeroBoxText[numberr]);
+	TCHAR* buf=new TCHAR[tstr.length+1];
+	GetWindowText(zeroBoxText[numberr], buf, tstr.length+1);
+	_tcscat_s(tstr.speech, 130, opt);
+	_tcscat_s(tstr.speech, 130, buf);
 	Beep(600, 800);
-	hr = pVoice->Speak(buf, SPF_IS_XML|SPF_ASYNC, 0);
+	hr = pVoice->Speak(tstr.speech, SPF_IS_XML|SPF_ASYNC, 0);
 	SetWindowText(NUMactive[numberr], L"Deactivated");
 	delete [] buf;
 	TextO[numberr].beginned=false;
-	CloseHandle(hThrd[numberr]);
-	TerminateThread(hThrd[numberr],0);
 }
-void changeBeginned(byte v)
+void changeBeginned(char v)
 {
 	TextO[v].beginned=false;
 }
-void checkBeginned(byte v)
+void checkBeginned(char v)
 {
 	if(TextO[v].beginned==false)
 	{
@@ -538,7 +561,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			CreateWindowEx(NULL,L"BUTTON",L"Stop",BS_DEFPUSHBUTTON|WS_CHILD|WS_VISIBLE,624,555,70,35,hWnd,(HMENU)EIGHT_BOX_STOP, NULL,NULL);
 			CreateWindowEx(NULL,L"BUTTON",L"Stop",BS_DEFPUSHBUTTON|WS_CHILD|WS_VISIBLE,624,620,70,35,hWnd,(HMENU)NINE_BOX_STOP, NULL,NULL);
 			zeroBoxText[0]	= CreateWindowEx(WS_EX_CLIENTEDGE,L"EDIT",L"Roshan",ES_LEFT|WS_CHILD|WS_VISIBLE,140,45,200,25,hWnd,NULL, NULL,NULL);
-			for(byte i=1; i!=10;i++)
+			for(char i=1; i!=10;i++)
 			{
 				zeroBoxText[i]	= CreateWindowEx(WS_EX_CLIENTEDGE,L"EDIT",L"",ES_LEFT|WS_CHILD|WS_VISIBLE,140,y,200,25,hWnd,NULL, NULL,NULL);
 				zeroBoxTime[i]	= CreateWindowEx(WS_EX_CLIENTEDGE,L"EDIT",L"",ES_CENTER|ES_NUMBER|WS_CHILD|WS_VISIBLE,360,y,50,25,hWnd,NULL, NULL,NULL);
@@ -552,7 +575,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			timeLeft[0]		= CreateWindowEx(NULL, L"STATIC", L"0", ES_CENTER|WS_CHILD|WS_VISIBLE, (sz.cx-szZero.cx)/2+470+szDeact.cx, 48, szZero.cx, szZero.cy, hWnd, NULL, NULL, NULL);
 			SendMessage(zeroBoxTime[0], EM_SETLIMITTEXT, 3, 0); 
 #pragma endregion interface
-			for(byte i=0; i!=10; i++)
+			for(char i=0; i!=10; i++)
 			{
 				TextO[i].init(i);
 			}
@@ -562,23 +585,9 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_STOP_TIMER_MSG:
 		{
 			DWORD dwExitCode = 0;
-			if( GetExitCodeThread(hThrd[(byte)lParam], &dwExitCode))
+			if( GetExitCodeThread(hThrd[(char)lParam], &dwExitCode))
 			{
-				TerminateThread(hThrd[(byte)lParam],0);
-				CloseHandle(hThrd[(byte)lParam]);
-				SetWindowText(NUMactive[(byte)lParam], L"Deactivated");
-				SetWindowText(timeLeft[(byte)lParam], L"0");
-				changeBeginned((byte)lParam);
-				TextStruct tstr;
-				ZeroMemory(tstr.speech, 120);
-				tstr.length = GetWindowTextLength(zeroBoxText[(byte)lParam]);
-				TCHAR* buf=new TCHAR[tstr.length+1];
-				TCHAR text[] = L" stopped";
-				GetWindowText(zeroBoxText[(byte)lParam], buf, tstr.length+1);
-				_tcscat_s(tstr.speech, 120, buf);
-				_tcscat_s(tstr.speech, 120, text);
-				hr = pVoice->Speak(tstr.speech, SPF_IS_XML|SPF_ASYNC, 0);
-				delete [] buf;
+				stopIT[(char)lParam]=true;
 			}
 		}
 		break;
@@ -631,7 +640,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)9);
 			break;
 		case APPLY_BUTTON:
-			for(byte i = 0; i!=10; i++)
+			for(char i = 0; i!=10; i++)
 			{
 				TextO[i].apply();
 			}
@@ -669,7 +678,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		default:
 			break;
 		}
-		for(byte i = 0; i!= 10; i++)
+		for(char i = 0; i!= 10; i++)
 		{
 			if(hFcsd==zeroBoxText[i])
 				return 1;
@@ -732,6 +741,8 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		pVoice->Release();
 		pVoice = NULL;
 		CoUninitialize();
+		for(char i = 0 ; i!=10; ++i)
+			SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)i);
 		PostQuitMessage(0);
 		break;
 	default:
@@ -743,7 +754,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 DWORD WINAPI Threads(LPVOID val)
 {
-	byte vval = *static_cast<byte*>(val);
+	char vval = *static_cast<char*>(val);
 	ThreadJob ThreadJobO;
 	ThreadJobO.numberr=vval;
 	TCHAR time[4];
@@ -751,10 +762,16 @@ DWORD WINAPI Threads(LPVOID val)
 	short count = _wtoi(time);
 	for(short i = count-1; i != -1; i--)
 	{
-		Sleep(1000);
-		ThreadJobO.changeTimeLeft(i);
+		if(stopIT[vval]==false)
+		{
+			Sleep(1000);
+			ThreadJobO.changeTimeLeft(i);
+		}else{
+			ThreadJobO.stopThread();}
 	}
 	ThreadJobO.closeThread();
+	CloseHandle(hThrd[vval]);
+	ExitThread(0);
 	return 0;
 }
 INT_PTR CALLBACK FAQ(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -789,15 +806,16 @@ INT_PTR CALLBACK About(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 	{
 	case WM_INITDIALOG:{
 		HFONT hFont = CreateFont(12, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE, 0x1, 
-	  OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, 
-	  DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));
-		TCHAR dVer [4];
-		ZeroMemory(&dVer, 4);
-		_tcscat_s(dVer,4, CReader::RDLL::returnVersion());
-		TCHAR dVerT [17];
-		_tcscat_s(dVerT, 17, L"DLL version ");
-		_tcscat_s(dVerT, 17, dVer);
-		HWND DLLver = CreateWindowEx(NULL, L"STATIC", dVerT, ES_LEFT|WS_CHILD|WS_VISIBLE, 94,45,80,14, hwndDlg, NULL, NULL, NULL);
+			OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, 
+			DEFAULT_PITCH | FF_DONTCARE, TEXT("MS Shell Dlg"));
+		TCHAR dVer [6];
+		ZeroMemory(&dVer, 6);
+		_tcscat_s(dVer,6, CReader::RDLL::returnVersion());
+		TCHAR dVerT [18];
+		ZeroMemory(&dVerT, 18);
+		_tcscat_s(dVerT, 18, L"DLL version ");
+		_tcscat_s(dVerT, 18, dVer);
+		HWND DLLver = CreateWindowEx(NULL, L"STATIC", dVerT, ES_LEFT|WS_CHILD|WS_VISIBLE, 94,45,95,14, hwndDlg, NULL, NULL, NULL);
 		SendMessage(DLLver, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		return (INT_PTR)TRUE;
@@ -867,10 +885,10 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				ZeroMemory(&cBuf, 50);
 				_tcscat_s(cBuf, 50, CReader::RDLL::ReadConfigForWindow());
 			}
-			byte i = 0;
-			byte entry=0;
-			byte count=0;
-			byte v;
+			char i = 0;
+			char entry=0;
+			char count=0;
+			char v;
 			TCHAR tBufvol[30];
 			ZeroMemory(&tBufvol, 30);
 			while(i!=_tcslen(cBuf))
@@ -891,7 +909,7 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 							TCHAR bf[3];
 							ZeroMemory(&bf,3);
 							_tcscat_s(bf,3,tBufvol);
-							int x = _wtoi(tBufvol);
+							char x = _wtoi(tBufvol);
 							switch (x)
 							{
 							case -2:
@@ -943,7 +961,7 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			TCHAR tBuf[100];
 			ZeroMemory(&tBuf, 100);
 			TCHAR tvol[4];
-			int ivol = SendMessage(vol, TBM_GETPOS,NULL,NULL);
+			char ivol = SendMessage(vol, TBM_GETPOS,NULL,NULL);
 			ivol*=10;
 			_itow_s(ivol, tvol, 10);
 			TCHAR tgender[7];
