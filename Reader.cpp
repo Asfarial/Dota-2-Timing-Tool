@@ -1,7 +1,7 @@
 #include "Reader.h"
 namespace CReader
 {
-	TCHAR* MyClass::ReadConfigForWindow()
+	TCHAR* RDLL::ReadConfigForWindow()
 	{
 		HANDLE hr;
 		hr = CreateFile(L"config.cfg", GENERIC_READ, 0,NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -50,7 +50,7 @@ namespace CReader
 
 		return retBuf;
 	}
-	TCHAR* MyClass::ReadConfig()
+	TCHAR* RDLL::ReadConfig()
 	{
 		HANDLE hr;
 		hr = CreateFile(L"config.cfg", GENERIC_READ, 0,NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -94,7 +94,7 @@ namespace CReader
 		delete [] tBuf;
 		return retBuf;
 	}
-	void MyClass::CreateConfig()
+	void RDLL::CreateConfig()
 	{
 		HANDLE hr = CreateFile(L"config.cfg", GENERIC_WRITE, 0,NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		DWORD written;
@@ -104,7 +104,7 @@ namespace CReader
 		CloseHandle(hr);
 		return;
 	}
-	void MyClass::ChangeConfig(LPCWSTR dataTransfer, int len)
+	void RDLL::ChangeConfig(LPCWSTR dataTransfer, int len)
 	{
 		HANDLE hr;
 		hr = CreateFile(L"config.cfg", GENERIC_WRITE, 0,NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -124,5 +124,9 @@ namespace CReader
 		data=0;
 		delete[]data;
 		return;
+	}
+	TCHAR* RDLL::returnVersion()
+	{
+		return L"1.2";
 	}
 }
