@@ -16,7 +16,7 @@ namespace CReader
 			CloseHandle(hr);
 			return L"";
 		}
-		int dwSize = (int)dwSize1.LowPart;
+		char dwSize = (char)dwSize1.LowPart;
 		DWORD size=0;
 		char* buf=new char[dwSize];
 		ReadFile(hr, buf, dwSize, &size, NULL);
@@ -26,8 +26,8 @@ namespace CReader
 		MultiByteToWideChar(CP_ACP, 0,  buf, -1, tBuf,size+1);
 		buf=0;
 		delete [] buf;
-		int i=0;
-		int entry=0;
+		char i=0;
+		char entry=0;
 		static TCHAR retBuf[50];
 		ZeroMemory(&retBuf, 50);
 		while(i!=size+1)
@@ -65,7 +65,7 @@ namespace CReader
 			CloseHandle(hr);
 			return L"";
 		}
-		int dwSize = (int)dwSize1.LowPart;
+		char dwSize = (char)dwSize1.LowPart;
 		DWORD size=0;
 		char* buf=new char[dwSize];
 		ReadFile(hr, buf, dwSize, &size, NULL);
@@ -75,7 +75,7 @@ namespace CReader
 		MultiByteToWideChar(CP_ACP, 0,  buf, -1, tBuf,size+1);
 		buf=0;
 		delete [] buf;
-		int i=0;
+		char i=0;
 		static TCHAR retBuf[100];
 		ZeroMemory(&retBuf, 100);
 		while(i!=size+1)
@@ -104,7 +104,7 @@ namespace CReader
 		CloseHandle(hr);
 		return;
 	}
-	void RDLL::ChangeConfig(LPCWSTR dataTransfer, int len)
+	void RDLL::ChangeConfig(LPCWSTR dataTransfer, char len)
 	{
 		HANDLE hr;
 		hr = CreateFile(L"config.cfg", GENERIC_WRITE, 0,NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -127,6 +127,6 @@ namespace CReader
 	}
 	TCHAR* RDLL::returnVersion()
 	{
-		return L"1.2";
+		return L"1.2.1";
 	}
 }
