@@ -16,14 +16,14 @@ namespace CReader
 			CloseHandle(hr);
 			return L"";
 		}
-		char dwSize = (char)dwSize1.LowPart;
+		int dwSize = (int)dwSize1.LowPart;
 		DWORD size=0;
 		char* buf=new char[dwSize];
 		ReadFile(hr, buf, dwSize, &size, NULL);
 		CloseHandle(hr);
 		buf[dwSize]='\0';
 		TCHAR* tBuf=new TCHAR[dwSize];
-		MultiByteToWideChar(CP_ACP, 0,  buf, -1, tBuf,size+1);
+		MultiByteToWideChar(CP_ACP, 0,  buf, -1, tBuf,size);
 		buf=0;
 		delete [] buf;
 		char i=0;
@@ -47,7 +47,6 @@ namespace CReader
 		}
 		tBuf=0;
 		delete [] tBuf;
-
 		return retBuf;
 	}
 	TCHAR* RDLL::ReadConfig()
@@ -65,34 +64,37 @@ namespace CReader
 			CloseHandle(hr);
 			return L"";
 		}
-		char dwSize = (char)dwSize1.LowPart;
+		int dwSize = (int)dwSize1.LowPart;
 		DWORD size=0;
-		char* buf=new char[dwSize];
-		ReadFile(hr, buf, dwSize, &size, NULL);
+		char* buf=new char[dwSize+1];
+		ReadFile(hr, buf, dwSize+1, &size, NULL);
 		CloseHandle(hr);
 		buf[dwSize]='\0';
-		TCHAR* tBuf=new TCHAR[dwSize];
-		MultiByteToWideChar(CP_ACP, 0,  buf, -1, tBuf,size+1);
+		TCHAR* tvBuf=new TCHAR[dwSize];
+		MultiByteToWideChar(CP_ACP, 0,  buf, -1, tvBuf,size);
 		buf=0;
 		delete [] buf;
+		
 		char i=0;
-		static TCHAR retBuf[100];
-		ZeroMemory(&retBuf, 100);
+		static TCHAR retvBuf[110];
+		ZeroMemory(&retvBuf, 110);
+
 		while(i!=size+1)
 		{
-			if(tBuf[i]=='\r')
+			if(tvBuf[i]=='\r')
 			{
-				tBuf[i]=' ';
-			}else if(tBuf[i]=='\n')
+				tvBuf[i]=' ';
+			}else if(tvBuf[i]=='\n')
 			{
-				tBuf[i]=' ';
+				tvBuf[i]=' ';
 			}
 			++i;
 		}
-		_tcscat_s(retBuf, 100, tBuf);
-		tBuf=0;
-		delete [] tBuf;
-		return retBuf;
+
+		_tcscat_s(retvBuf, 110, tvBuf);
+		tvBuf=0;
+		delete [] tvBuf;
+		return retvBuf;
 	}
 	void RDLL::CreateConfig()
 	{
@@ -127,6 +129,6 @@ namespace CReader
 	}
 	TCHAR* RDLL::returnVersion()
 	{
-		return L"1.2.1";
+		return L"1.2.2";
 	}
 }
