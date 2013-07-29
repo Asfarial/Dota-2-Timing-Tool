@@ -43,8 +43,8 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam);
 typedef struct
 {unsigned char length;
 TCHAR stdTime[4];
-TCHAR text[130];
-TCHAR speech[130];
+TCHAR text[140];
+TCHAR speech[140];
 }TextStruct;
 class ThreadJob
 {
@@ -71,8 +71,8 @@ class Text
 public:
 	Text()
 	{
-		ZeroMemory(&retStruct.speech, 130);
-		ZeroMemory(&retStruct.text, 130);
+		ZeroMemory(&retStruct.speech, 140);
+		ZeroMemory(&retStruct.text, 140);
 		ZeroMemory(&retStruct.stdTime, 4);
 		ZeroMemory(&onOffbuf, 4);
 		retStruct.length=0;
@@ -113,7 +113,7 @@ public:
 		getText();
 		setTrue();
 		hr = pVoice->Speak(retStruct.speech, SPF_IS_XML|SPF_ASYNC, 0);
-		ZeroMemory(&retStruct.speech, 130);
+		ZeroMemory(&retStruct.speech, 140);
 		if(beginned==false)
 			beginThread();
 	}
@@ -125,12 +125,12 @@ protected:
 	}
 	VOID getMainText()
 	{
-		ZeroMemory(&retStruct.text, 130);
+		ZeroMemory(&retStruct.text, 140);
 		ZeroMemory(&retStruct.stdTime, 4);
 		retStruct.length=GetWindowTextLength(zeroBoxText[number]);
 		TCHAR* buf=new TCHAR[retStruct.length+1];
 		GetWindowText(zeroBoxText[number], buf, retStruct.length+1);
-		_tcscat_s(retStruct.text, 130, buf);
+		_tcscat_s(retStruct.text, 140, buf);
 		delete [] buf;
 		GetWindowText(zeroBoxTime[number], retStruct.stdTime, 4);
 		applied=true;
@@ -141,11 +141,11 @@ protected:
 		TCHAR sleep[] = L"<silence msec=\"100\"/>";
 		onOff();
 		TCHAR seconds[] = L" seconds";
-		_tcscat_s(retStruct.speech, 130, opt);
-		_tcscat_s(retStruct.speech, 130, retStruct.text); 
-		_tcscat_s(retStruct.speech, 130, sleep);
-		_tcscat_s(retStruct.speech, 130, onOffbuf);
-		_tcscat_s(retStruct.speech, 130, seconds);
+		_tcscat_s(retStruct.speech, 140, opt);
+		_tcscat_s(retStruct.speech, 140, retStruct.text); 
+		_tcscat_s(retStruct.speech, 140, sleep);
+		_tcscat_s(retStruct.speech, 140, onOffbuf);
+		_tcscat_s(retStruct.speech, 140, seconds);
 
 	}
 	VOID onOff()
@@ -177,8 +177,8 @@ protected:
 }TextO[9];
 void loadOptions()
 {
-	ZeroMemory(&opt, 100);
-	_tcscat_s(opt, 100, CReader::RDLL::ReadConfig());
+	ZeroMemory(&opt, 110);
+	_tcscat_s(opt, 110, CReader::RDLL::ReadConfig());
 	if(CompareStringEx(LOCALE_NAME_INVARIANT, SORT_STRINGSORT, opt, _tcslen(opt), L"", _tcslen(L""), NULL, NULL, 0)==CSTR_EQUAL)
 	{
 		CReader::RDLL::CreateConfig();
@@ -299,7 +299,7 @@ void RegKeys()
 	RegisterHotKey(NULL, 7, MOD_NOREPEAT, VK_NUMPAD7);
 	RegisterHotKey(NULL, 8, MOD_NOREPEAT, VK_NUMPAD8);
 	RegisterHotKey(NULL, 9, MOD_NOREPEAT, VK_NUMPAD9);
-	RegisterHotKey(NULL, 10, MOD_NOREPEAT, VK_SUBTRACT);
+	RegisterHotKey(NULL, 10,NULL		, VK_SUBTRACT);
 }
 #pragma endregion functions
 int WINAPI WinMain(HINSTANCE hInstance,
@@ -362,70 +362,73 @@ int WINAPI WinMain(HINSTANCE hInstance,
 				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
 				break;
 			case 1:
-				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				SendMessage(window2, WM_COMMAND, ONE_NUM, NULL);
 				break;
 			case 2:
-				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				SendMessage(window2, WM_COMMAND, TWO_NUM, NULL);
 				break;
 			case 3:
-				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				SendMessage(window2, WM_COMMAND, THREE_NUM, NULL);
 				break;
 			case 4:
-				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				SendMessage(window2, WM_COMMAND, FOUR_NUM, NULL);
 				break;
 			case 5:
-				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				SendMessage(window2, WM_COMMAND, FIVE_NUM, NULL);
 				break;
 			case 6:
-				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				SendMessage(window2, WM_COMMAND, SIX_NUM, NULL);
 				break;
 			case 7:
-				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				SendMessage(window2, WM_COMMAND, SEVEN_NUM, NULL);
 				break;
 			case 8:
-				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				SendMessage(window2, WM_COMMAND, EIGHT_NUM, NULL);
 				break;
 			case 9:
-				SendMessage(window2, WM_COMMAND, ZERO_NUM, NULL);
+				SendMessage(window2, WM_COMMAND, NINE_NUM, NULL);
 				break;
 			case 10:
-				GetMessage(&msg, NULL, 0, 0);
-				if(msg.message==WM_HOTKEY)
+				while(msg.message==WM_HOTKEY&&msg.wParam==10)
 				{
-					switch (msg.wParam)
+					GetMessage(&msg, NULL, 0, 0);
+					if(msg.message==WM_HOTKEY)
 					{
-					case 0:
-						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)0);
-						break;
-					case 1:
-						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)1);
-						break;
-					case 2:
-						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)2);
-						break;
-					case 3:
-						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)3);
-						break;
-					case 4:
-						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)4);
-						break;
-					case 5:
-						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)5);
-						break;
-					case 6:
-						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)6);
-						break;
-					case 7:
-						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)7);
-						break;
-					case 8:
-						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)8);
-						break;
-					case 9:
-						SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)9);
-						break;
-					default:
-						break;
+						switch (msg.wParam)
+						{
+						case 0:
+							SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)0);
+							break;
+						case 1:
+							SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)1);
+							break;
+						case 2:
+							SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)2);
+							break;
+						case 3:
+							SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)3);
+							break;
+						case 4:
+							SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)4);
+							break;
+						case 5:
+							SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)5);
+							break;
+						case 6:
+							SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)6);
+							break;
+						case 7:
+							SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)7);
+							break;
+						case 8:
+							SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)8);
+							break;
+						case 9:
+							SendMessage(window2, WM_STOP_TIMER_MSG, 0,(LPARAM)9);
+							break;
+						default:
+							break;
+						}
 					}
 				}
 				break;
@@ -876,14 +879,14 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				CB_ADDSTRING,
 				0,
 				reinterpret_cast<LPARAM>((LPCWSTR)genderComboBoxItems[1]));
-			TCHAR cBuf[50];
-			ZeroMemory(&cBuf, 50);
-			_tcscat_s(cBuf, 50, CReader::RDLL::ReadConfigForWindow());
-			if(CompareStringEx(LOCALE_NAME_INVARIANT, SORT_STRINGSORT, cBuf, _tcslen(cBuf), L"", _tcslen(L""), NULL, NULL, 0)==CSTR_EQUAL)
+			TCHAR cBvuf[100];
+			ZeroMemory(&cBvuf, 100);
+			_tcscat_s(cBvuf, 100, CReader::RDLL::ReadConfigForWindow());
+			if(CompareStringEx(LOCALE_NAME_INVARIANT, SORT_STRINGSORT, cBvuf, _tcslen(cBvuf), L"", _tcslen(L""), NULL, NULL, 0)==CSTR_EQUAL)
 			{
 				CReader::RDLL::CreateConfig();
-				ZeroMemory(&cBuf, 50);
-				_tcscat_s(cBuf, 50, CReader::RDLL::ReadConfigForWindow());
+				ZeroMemory(&cBvuf, 100);
+				_tcscat_s(cBvuf, 100, CReader::RDLL::ReadConfigForWindow());
 			}
 			char i = 0;
 			char entry=0;
@@ -891,12 +894,12 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			char v;
 			TCHAR tBufvol[30];
 			ZeroMemory(&tBufvol, 30);
-			while(i!=_tcslen(cBuf))
+			while(i!=_tcslen(cBvuf))
 			{
-				if(cBuf[i]=='|')
+				if(cBvuf[i]=='|')
 				{
 					++count;
-					_tcsncat_s(tBufvol, 30, &cBuf[entry], i-entry);
+					_tcsncat_s(tBufvol, 30, &cBvuf[entry], i-entry);
 					entry=i+1;
 					switch (count)
 					{
@@ -960,12 +963,12 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		{
 			TCHAR tBuf[100];
 			ZeroMemory(&tBuf, 100);
-			TCHAR tvol[4];
+			TCHAR tvol[5];
 			char ivol = SendMessage(vol, TBM_GETPOS,NULL,NULL);
 			ivol*=10;
 			_itow_s(ivol, tvol, 10);
 			TCHAR tgender[7];
-			GetWindowText(gender, tgender, 7);
+			GetWindowText(gender, tgender,6);
 			TCHAR tspeed[3];
 			GetWindowText(speed, tspeed, 3);
 			swprintf_s(tBuf, L"<volume level=\"%ls\"/>\r\n<rate speed=\"%ls\"/>\r\n<voice required=\"Gender=%ls;Age=Adult\"/>", tvol, tspeed, tgender);
