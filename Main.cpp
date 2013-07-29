@@ -968,7 +968,7 @@ INT_PTR CALLBACK Options(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			ivol*=10;
 			_itow_s(ivol, tvol, 10);
 			TCHAR tgender[7];
-			GetWindowText(gender, tgender,6);
+			GetWindowText(gender, tgender,7);
 			TCHAR tspeed[3];
 			GetWindowText(speed, tspeed, 3);
 			swprintf_s(tBuf, L"<volume level=\"%ls\"/>\r\n<rate speed=\"%ls\"/>\r\n<voice required=\"Gender=%ls;Age=Adult\"/>", tvol, tspeed, tgender);
